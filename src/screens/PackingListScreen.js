@@ -9,6 +9,8 @@ import {
   FlatList,
 } from 'react-native'
 
+import ListInput from '../components/ListInput'
+
 export default class PackingListScreen extends Component {
   state = {
     items: [],
@@ -21,44 +23,14 @@ export default class PackingListScreen extends Component {
 
     this.setState({
       items: newItems,
+      inputValue: '',
     })
-
-    this.input.clear()
   }
 
   clearItems = () => {
     this.setState(() => ({
       items: [],
     }))
-  }
-
-  renderInputRow = () => {
-    const { inputValue } = this.state
-    return (
-      <View style={styles.inputRow}>
-        <TextInput
-          autoFocus
-          ref={ref => (this.input = ref)}
-          style={styles.input}
-          value={inputValue}
-          onChangeText={value =>
-            this.setState(() => ({
-              inputValue: value,
-            }))
-          }
-          onSubmitEditing={this.addNewItem}
-        />
-        <TouchableOpacity style={styles.button} onPress={this.addNewItem}>
-          <Text style={styles.buttonText}>Add</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.button, { backgroundColor: 'gray' }]}
-          onPress={this.clearItems}
-        >
-          <Text style={styles.buttonText}>Clear</Text>
-        </TouchableOpacity>
-      </View>
-    )
   }
 
   checkItem = selectedItem => {
@@ -90,7 +62,14 @@ export default class PackingListScreen extends Component {
     const { inputValue, items } = this.state
     return (
       <View style={styles.container}>
-        <View style={{ flex: 1 }}>{this.renderInputRow()}</View>
+        <View style={{ flex: 1 }}>
+          <ListInput
+            addNewItem={this.addNewItem}
+            clearItems={this.clearItems}
+            onChangeText={value => this.setState(() => ({ inputValue: value }))}
+            value={inputValue}
+          />
+        </View>
         <View
           style={{
             flex: 1,
@@ -123,6 +102,10 @@ const styles = StyleSheet.create({
       height: 5,
     },
   },
+  buttonText: {
+    padding: 5,
+    color: 'white',
+  },
   container: {
     flex: 1,
     backgroundColor: '#F5FCFF',
@@ -144,9 +127,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  buttonText: {
-    padding: 5,
-    color: 'white',
   },
 })
