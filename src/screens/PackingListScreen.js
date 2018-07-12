@@ -8,10 +8,26 @@ import {
   TouchableOpacity,
   FlatList,
 } from 'react-native'
+import { Subscribe } from 'unstated'
+import { RootStore } from '../app/RootComponent'
 
 import ListInput from '../components/ListInput'
 
 export default class PackingListScreen extends Component {
+  static navigationOptions = ({ navigation }) => {
+    return {
+      headerTitle: 'Packing List',
+      headerRight: (
+        <Text
+          style={{ paddingRight: 10 }}
+          onPress={() => navigation.navigate('Input')}
+        >
+          Input
+        </Text>
+      ),
+    }
+  }
+
   state = {
     items: [],
     inputValue: '',
@@ -45,15 +61,31 @@ export default class PackingListScreen extends Component {
     }))
   }
 
-  listItems = (item, index) => {
+  listItems = (item, index, store) => {
     const backgroundColor = item.checked ? 'green' : 'red'
     return (
       <TouchableOpacity
         key={index}
-        style={{ backgroundColor }}
-        onPress={() => this.checkItem(item)}
+        style={{
+          backgroundColor,
+          flex: 1,
+          margin: 2,
+          justifyContent: 'center',
+          borderRadius: 4,
+        }}
+        onPress={() => store.checkItem(item)}
       >
-        <Text style={styles.theValue}>{item.name}</Text>
+        <Text
+          style={{
+            margin: 3,
+            fontSize: 18,
+            fontWeight: 'bold',
+            color: 'bisque',
+            alignSelf: 'center',
+          }}
+        >
+          {item.name}
+        </Text>
       </TouchableOpacity>
     )
   }
@@ -61,30 +93,27 @@ export default class PackingListScreen extends Component {
   render() {
     const { inputValue, items } = this.state
     return (
-      <View style={styles.container}>
-        <View style={{ flex: 1 }}>
-          <ListInput
-            addNewItem={this.addNewItem}
-            clearItems={this.clearItems}
-            onChangeText={value => this.setState(() => ({ inputValue: value }))}
-            value={inputValue}
-          />
-        </View>
-        <View
-          style={{
-            flex: 1,
-            borderTopWidth: 1,
-            borderColor: 'dodgerblue',
-            paddingTop: 5,
-          }}
-        >
-          <FlatList
-            data={items}
-            keyExtractor={item => item.name}
-            renderItem={({ item, index }) => this.listItems(item, index)}
-          />
-        </View>
-      </View>
+      <Subscribe to={[RootStore]}>
+        {rootStore => (
+          <View style={styles.container}>
+            <FlatList
+              data={rootStore.state.items}
+              keyExtractor={item => item.name}
+              renderItem={({ item, index }) =>
+                this.listItems(item, index, rootStore)
+              }
+              numColumns={3}
+              contentContainerStyle={{
+                flex: 1,
+                borderWidth: 1,
+                borderColor: 'lightgray',
+                backgroundColor: 'white',
+              }}
+              style={{ padding: 20 }}
+            />
+          </View>
+        )}
+      </Subscribe>
     )
   }
 }
